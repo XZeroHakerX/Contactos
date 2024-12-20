@@ -63,11 +63,22 @@
                 android:clickable="true"
                 app:srcCompat="@android:drawable/ic_dialog_dialer"
                 android:contentDescription="@string/desc_boton_ver" />
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchView"
+                android:layout_width="240dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/primario_variante"
+                android:visibility="gone"
+                android:queryHint="Buscar por nombre" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
@@ -94,6 +105,17 @@
             android:padding="10dp" />
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnBuscar"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:maxImageSize="50dp"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/primario"
+        android:src="@android:drawable/ic_menu_search"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnAniadir"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAniadir"

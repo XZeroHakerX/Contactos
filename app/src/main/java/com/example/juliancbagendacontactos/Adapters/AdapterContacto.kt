@@ -13,9 +13,9 @@ import com.example.juliancbagendacontactos.R
 import com.example.juliancbagendacontactos.models.Contacto
 
 class AdapterContacto(
-    private val contactos: ArrayList<Contacto>,
+    private var contactos: ArrayList<Contacto>, // Cambié a var para que se pueda actualizar la lista
     private val llamadaClick: (Contacto) -> Unit,
-    private val favClick: (Contacto) -> Unit, // Cambié el parámetro de `holder` por `position`
+    private val favClick: (Contacto) -> Unit,
     private val menuClick: (Contacto) -> Unit
 ) : RecyclerView.Adapter<AdapterContacto.ViewHolder>() {
 
@@ -34,9 +34,9 @@ class AdapterContacto(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val contacto = contactos[position]
-        if(contacto.nombre?.length!! >= 8){
-            holder.nombre.text = contacto.nombre.substring(0,6) + "..."
-        }else {
+        if (contacto.nombre?.length!! >= 8) {
+            holder.nombre.text = contacto.nombre.substring(0, 6) + "..."
+        } else {
             holder.nombre.text = contacto.nombre
         }
 
@@ -79,5 +79,12 @@ class AdapterContacto(
         } else {
             holder.btnFav.setImageResource(android.R.drawable.btn_star_big_off) // Favorito desactivado
         }
+    }
+
+    // Este es el nuevo método que actualiza la lista
+    fun updateList(nuevaLista: List<Contacto>) {
+        contactos.clear()  // Limpiar la lista actual
+        contactos.addAll(nuevaLista)  // Agregar la nueva lista ordenada o filtrada
+        notifyDataSetChanged()  // Notificar al adaptador que la lista ha cambiado
     }
 }

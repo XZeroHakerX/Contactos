@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -20,7 +21,9 @@ import com.example.juliancbagendacontactos.adapters.AdapterContacto
 import com.example.juliancbagendacontactos.adapters.AdapterContacto.ViewHolder
 import com.example.juliancbagendacontactos.databinding.ActivityMainBinding
 import com.example.juliancbagendacontactos.models.Contacto
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
+import androidx.appcompat.widget.SearchView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -28,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var contactosRecycler: RecyclerView
     private lateinit var contactosAdaptador: AdapterContacto
     private lateinit var database: DatabaseReference
+    private lateinit var searchView: SearchView
+    private lateinit var btnBuscar: FloatingActionButton
+    private lateinit var contactosListaOriginal: ArrayList<Contacto>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +48,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        searchView = findViewById(R.id.searchView)
+        btnBuscar = findViewById(R.id.btnBuscar)
+
         // Configuración de Firebase
         database = FirebaseDatabase.getInstance().reference
 
@@ -51,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         contactosRecycler.setHasFixedSize(true)
         contactosLista = arrayListOf()
 
+        contactosListaOriginal = ArrayList(contactosLista)  // Copiar la lista completa a contactosListaOriginal
         // Adaptador para RecyclerView
         contactosAdaptador = AdapterContacto(contactosLista,
             llamadaClick = { contacto ->
@@ -78,7 +88,6 @@ class MainActivity : AppCompatActivity() {
             },
             menuClick = { contacto ->
                 // Acción al hacer clic en el botón de más opciones
-                // Ejemplo: abrir un diálogo para editar o eliminar contacto
                 val intent = Intent(this, EditarContactoActivity::class.java)
                 intent.putExtra("contacto", contacto)  // Envías el contacto a la actividad de edición
                 startActivityForResult(intent, REQUEST_CODE_EDITAR_CONTACTO)  // Inicia la actividad y espera el resultado
@@ -162,6 +171,30 @@ class MainActivity : AppCompatActivity() {
         // Cargar los datos de Firebase
         cargarDatos()
 
+        btnBuscar.setOnClickListener {
+            if (searchView.visibility == View.GONE) {
+                // Mostrar la barra de búsqueda
+                searchView.visibility = View.VISIBLE
+            } else {
+                // Ocultar la barra de búsqueda
+                searchView.visibility = View.GONE
+                // Limpiar la búsqueda cuando se oculta la barra
+                searchView.setQuery("", false)
+                filterContactos("")  // Mostrar todos los contactos y ordenarlos
+            }
+        }
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false // No es necesario hacer nada aquí
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterContactos(newText)  // Filtrar los contactos según el texto ingresado
+                return true
+            }
+        })
+
         // Configurar el botón flotante para agregar un contacto
         binding.btnAniadir.setOnClickListener {
             // Acción al hacer clic en el botón de añadir un contacto
@@ -170,6 +203,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun filterContactos(query: String?) {
+        val filteredList = if (query.isNullOrEmpty()) {
+            // Si no hay texto, restauramos la lista completa desde contactosListaOriginal
+            contactosListaOriginal
+        } else {
+            // Filtrar los contactos por el nombre
+            contactosListaOriginal.filter { it.nombre!!.contains(query, ignoreCase = true) }
+        }
+
+        // Ordenar la lista filtrada (o completa si no hay filtro)
+        val sortedList = filteredList.sortedWith(compareByDescending<Contacto> { it.vip }.thenBy { it.nombre })
+
+        // Actualizar el adaptador con la lista ordenada
+        contactosAdaptador.updateList(sortedList)
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -181,7 +229,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     // Función para cargar los datos de Firebase
     private fun cargarDatos() {
         // Aquí iría tu lógica para cargar la lista de contactos desde Firebase
@@ -190,8 +237,10 @@ class MainActivity : AppCompatActivity() {
         database.child("contactos").addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val contacto = snapshot.getValue(Contacto::class.java)
-                if (contactosLista.none { it.id == contacto!!.id }) {
-                    contactosLista.add(contacto!!)
+                if (contacto != null && contactosLista.none { it.id == contacto.id }) {
+                    contactosLista.add(contacto)
+                    // Actualiza la lista original después de cargar los datos
+                    contactosListaOriginal = ArrayList(contactosLista)
                     ordenarContactos()  // Ordenar antes de actualizar el RecyclerView
                     contactosAdaptador.notifyItemInserted(contactosLista.size - 1)
                 }
@@ -234,9 +283,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun ordenarContactos() {
         // Ordenar los contactos, los favoritos primero
-        contactosLista.sortWith(compareByDescending { it.vip })
+        contactosLista.sortWith(compareByDescending<Contacto> { it.vip }.thenBy { it.nombre })
         contactosAdaptador.notifyDataSetChanged()
     }
+
     companion object {
         private const val REQUEST_CODE_EDITAR_CONTACTO = 1001
     }
