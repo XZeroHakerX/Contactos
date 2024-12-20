@@ -107,7 +107,7 @@ class AgregarContactoActivity : AppCompatActivity() {
     private fun guardarContacto() {
         //Validacion de campos obligatorios minimos:
         val nombre = binding.etNombre.text.toString().trim()
-        val telefono1 = binding.etTelefono1.text.toString().trim().toIntOrNull()
+        val telefono1S = binding.etTelefono1.text.toString().trim()
 
         //Error de datos minimos:
 
@@ -115,11 +115,11 @@ class AgregarContactoActivity : AppCompatActivity() {
             binding.etNombre.error = "Este campo es obligatorio"
         }
 
-        if (telefono1.toString().isEmpty()) {
+        if (telefono1S.toString().isEmpty()) {
             binding.etTelefono1.error = "Este campo es obligatorio"
         }
 
-        if (nombre.isEmpty() || telefono1.toString().isEmpty()) {
+        if (nombre.isEmpty() || telefono1S.toString().isEmpty()) {
             Toast.makeText(
                 this,
                 "Por favor, completa todos los campos obligatorios",
@@ -128,6 +128,7 @@ class AgregarContactoActivity : AppCompatActivity() {
             return
         }
 
+        val telefono1 = telefono1S.toIntOrNull()
 
         //Obtener otros campos opcionales
         val apellidoUno = binding.etApellido1.text.toString().trim()

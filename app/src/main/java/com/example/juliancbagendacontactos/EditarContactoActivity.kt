@@ -177,6 +177,23 @@ class EditarContactoActivity : AppCompatActivity() {
             Base64.encodeToString(it, Base64.DEFAULT)
         }
 
+        //Variable auxiliar para comprobar la fecha
+        val nacimientoTexto = binding.btnFechaNacimiento.text?.toString()
+
+        //Validamos si la fecha fue ingresada y si tiene formato correcto
+        val nacimiento: Long?
+
+        if(nacimientoTexto?.trim().equals("Cambiar Fecha Nacimiento") || nacimientoTexto?.trim()!!.length != 9){
+            nacimiento = null
+            Toast.makeText(this, "Fecha inválida, se dejará en blanco", Toast.LENGTH_SHORT).show()
+        }else {
+            nacimiento = nacimientoTexto.let {
+                val parts = it.split("/")
+                GregorianCalendar(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt()).timeInMillis
+            }
+        }
+
+
         //Nuevo contacto con los datos modificados, teniendo en cuenta que la id se mantenga y sea la misma:
         val nuevoContacto = Contacto(
             id = contactoId,
@@ -187,10 +204,7 @@ class EditarContactoActivity : AppCompatActivity() {
             numeroDos = binding.inputNumeroDos.text.toString().toIntOrNull(),
             email = binding.inputEmail.text.toString(),
             mensajePersonal = binding.inputMensajePersonal.text.toString(),
-            nacimiento = binding.btnFechaNacimiento.text?.toString()?.let {
-                val parts = it.split("/")
-                GregorianCalendar(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt()).timeInMillis
-            },
+            nacimiento = nacimiento,
             imagen = imagenBase64,
             vip = contactoVip
         )
