@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/primario_variante"
+    >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/secundario"
+        android:padding="5dp">
+
+
+        <ImageView
+            android:id="@+id/imageContacto"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/user_pordefecto"
+             />
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputNombre"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Nombre"
+                />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Primer Apellido:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputApellidoUno"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="(Opcional)" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Segundo Apellido:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputApellidoDos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="(Opcional)" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Número Principal:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputNumeroUno"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Número Principal"
+                />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Número Secundario:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputNumeroDos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="(Opcional)" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputEmail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint=" (Opcional)" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mensaje Personal:"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:textSize="20dp"
+                android:textColor="@color/blanco"
+                android:background="@color/primario"/>
+
+            <EditText
+                android:id="@+id/inputMensajePersonal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint=" (Opcional)" />
+        </LinearLayout>
+
+         <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+             <TextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="Cambiar Fecha:"
+                 android:layout_gravity="center_vertical"
+                 android:layout_marginEnd="8dp"
+                 android:textSize="20dp"
+                 android:textColor="@color/blanco"
+                 android:background="@color/primario"/>
+            <Button
+                android:id="@+id/btnFechaNacimiento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:text="Cambiar Fecha Nacimiento"
+                android:backgroundTint="@color/boton_flotante"/>
+         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnGuardar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="Guardar Cambios"
+            android:backgroundTint="@color/primario"/>
+
+        <Button
+            android:id="@+id/btnVolver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"
+            android:text="Cancelar Cambios"
+            android:backgroundTint="@color/negro"/>
+
+        <Button
+            android:id="@+id/btnEliminar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="Eliminar Contacto"
+            android:backgroundTint="@color/rojo" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "714428886296",
+    "firebase_url": "https://jcbagendacontactos-default-rtdb.firebaseio.com",
+    "project_id": "jcbagendacontactos",
+    "storage_bucket": "jcbagendacontactos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714428886296:android:cb813225220d7f1abd426d",
+        "android_client_info": {
+          "package_name": "com.example.juliancbagendacontactos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSobSt1yqXOPKOvwj09ilk0QYHR79CEoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

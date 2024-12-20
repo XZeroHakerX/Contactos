@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="negro">#FF000000</color>
+    <color name="blanco">#FFFFFFFF</color>
+    <color name="rojo">#FFFF0000</color>
+    <color name="primario">#FF19762D</color>
+    <color name="primario_variante">#501565C0</color>
+    <color name="secundario">#FF4CAF50</color>
+    <color name="background">#FF959595</color>
+    <color name="division">#FFE0E0E0</color>
+    <color name="texto_principal">#FF212121</color>
+    <color name="texto_secundario">#FF757575</color>
+    <color name="boton_flotante">#FFFF9800</color>
+    <color name="resaltar">#FFFFEB3B</color>
+    <color name="iconos">#FF00BCD4</color>
+
+
+</resources>

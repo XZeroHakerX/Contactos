@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">JulianCB AgendaContactos</string>
+    <string name="txt_titulo_app">ContactsProº</string>
+    <string name="txtLayoutNombre">Nombre</string>
+    <string name="txtLayoutApellidoUno">Apellido 1</string>
+    <string name="txtLayoutApellidoDos">Apellido 2</string>
+    <string name="txtLayoutTelefonoUno">Teléfono 1</string>
+    <string name="txtLayoutTelefonoDos">Teléfono 2</string>
+    <string name="txtLayoutEmail">Email</string>
+    <string name="txtLayoutNacimiento">Fecha de Cumpleaños</string>
+    <string name="txtLayoutNotaPersonal">Nota Personal</string>
+    <string name="txtSwitchVip">Favorito?</string>
+    <string name="txtBotonGuardar">AGREGAR</string>
+    <string name="txtBotonCancelar">Cancelar</string>
+    <string name="desc_imagen_contacto">Imagen Contacto</string>
+    <string name="desc_boton_fav">Boton favorito</string>
+    <string name="desc_boton_editar">Boton Editar</string>
+    <string name="desc_imagen_app">Imagen Aplicacion</string>
+    <string name="desc_boton_ver">Boton cambio de vista</string>
+    <string name="desc_recycler_contactos">RecyclerView principal</string>
+    <string name="desc_boton_aniadir">Aniadir nuevo contacto</string>
+</resources>
