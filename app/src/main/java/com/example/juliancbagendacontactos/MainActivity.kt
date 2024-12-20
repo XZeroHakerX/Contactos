@@ -96,7 +96,8 @@ class MainActivity : AppCompatActivity() {
             },
             menuClick = { contacto ->
                 val intent = Intent(this, EditarContactoActivity::class.java)
-                intent.putExtra("contactoId", contacto.id) // Pasar solo el ID del contacto
+                intent.putExtra("contactoId", contacto.id)
+                intent.putExtra("esVip", contacto.vip)
                 startActivityForResult(intent, REQUEST_CODE_EDITAR_CONTACTO)
             })
 

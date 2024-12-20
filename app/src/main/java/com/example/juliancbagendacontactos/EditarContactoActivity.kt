@@ -29,6 +29,7 @@ class EditarContactoActivity : AppCompatActivity() {
     //Variables para el binding y para el id sobre el que trabajaremos:
     private lateinit var binding: ActivityEditarContactoBinding
     private var contactoId: String? = null
+    private var contactoVip: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +44,7 @@ class EditarContactoActivity : AppCompatActivity() {
             finish()
             return
         }
+        contactoVip = intent.getBooleanExtra("esVip", false)
 
         //Cargamos datos del contacto desde irebase a partir del id:
         val database = FirebaseDatabase.getInstance().reference.child("contactos").child(contactoId!!)
@@ -190,7 +192,7 @@ class EditarContactoActivity : AppCompatActivity() {
                 GregorianCalendar(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt()).timeInMillis
             },
             imagen = imagenBase64,
-            vip = false // Cambiar según tu lógica
+            vip = contactoVip
         )
 
         //Si es correcto y no falla nada, guardamos en firebase:
