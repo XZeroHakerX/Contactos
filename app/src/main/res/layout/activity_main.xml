@@ -133,12 +133,20 @@
         app:layout_constraintStart_toStartOf="parent"
         android:scaleType="centerCrop"
         app:fabSize="normal"
-        android:adjustViewBounds="true"
+        android:adjustViewBounds="true"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnResumen"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/primario"
+        android:src="@android:drawable/btn_star_big_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnAniadir"
+        app:maxImageSize="50dp" />
 
 
-        >
-
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

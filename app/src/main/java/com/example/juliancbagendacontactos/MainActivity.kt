@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -20,7 +21,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.juliancbagendacontactos.adapters.AdapterContacto
-import com.example.juliancbagendacontactos.adapters.AdapterContacto.ViewHolder
 import com.example.juliancbagendacontactos.databinding.ActivityMainBinding
 import com.example.juliancbagendacontactos.models.Contacto
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -246,6 +246,33 @@ class MainActivity : AppCompatActivity() {
         binding.botonMenuVer.setOnClickListener{
             mostrarMenu(it)
         }
+
+        //Add la funcionalidad para el boton Resumen
+        binding.btnResumen.setOnClickListener {
+            mostrarResumenContactos()
+        }
+    }
+
+    //Metodo para mostrar una alerta con un resumen de la lista:
+    private fun mostrarResumenContactos() {
+        val total = contactosLista.size
+        val vipCount = contactosLista.count { it.vip == true }
+        val noVipCount = total - vipCount
+
+        AlertDialog.Builder(this)
+            .setTitle("Resumen de Contactos")
+            .setMessage(
+            """
+            Total de contactos: $total
+                
+            Contactos VIP: $vipCount
+                
+            Contactos no VIP: $noVipCount
+            """.trimIndent()
+            )
+            .setPositiveButton("Cerrar", null)
+            .create()
+            .show()
     }
 
     //Metodo para mostrar el menu, mediante un popup:
