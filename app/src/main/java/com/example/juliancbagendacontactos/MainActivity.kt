@@ -1,6 +1,7 @@
 package com.example.juliancbagendacontactos
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
@@ -11,6 +12,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
 
 
         //Busqueda tradicional de componentes, usados para el buscador:
@@ -231,8 +234,41 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, AgregarContactoActivity::class.java)
             startActivity(intent)
         }
+
+        //Add la funcionalidad para el boton Menu
+        binding.botonMenuVer.setOnClickListener{
+            mostrarMenu(it)
+        }
     }
 
+    //Metodo para mostrar el menu, mediante un popup:
+    private fun mostrarMenu(view: View){
+        val popupMenu = PopupMenu(this, view)
+        popupMenu.menuInflater.inflate(R.menu.menu_opciones, popupMenu.menu)
+
+        //Add los itmes a mostrar en el menu
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.item_info -> {
+                    mostrarInfoEmpresa()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    //Dialogo con la informacion de la empresa:
+    private fun mostrarInfoEmpresa() {
+        // Crear un diálogo para mostrar la información
+        AlertDialog.Builder(this)
+            .setTitle("Información de la Empresa")
+            .setMessage("Nombre: Julian Cabanillas Blanco\n\nCurso: 2DAMBi \n\nCorreo: xzerohakerx@gmail.com\n\n\n\nVersion App: 0.7B")
+            .setPositiveButton("GRACIAS!") { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
+    }
 
 
     //Metodo para filtrar la lista con el buscador:
