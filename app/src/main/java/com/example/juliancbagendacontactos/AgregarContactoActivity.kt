@@ -160,6 +160,7 @@ class AgregarContactoActivity : AppCompatActivity() {
             }
     }
 
+
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
