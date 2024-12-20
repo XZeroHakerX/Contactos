@@ -26,6 +26,10 @@ import com.google.firebase.database.*
 import androidx.appcompat.widget.SearchView
 
 class MainActivity : AppCompatActivity() {
+
+    //Variables para el uso del programa, variables para binding, para la conexion a base de datos,
+    //para el recyclerView y su Adaptador, una lista provisional de los contactos recuperados de la
+    //base de datos e inicializacion de los componentes de busqueda:
     private lateinit var binding: ActivityMainBinding
     private lateinit var contactosLista: ArrayList<Contacto>
     private lateinit var contactosRecycler: RecyclerView
@@ -41,42 +45,46 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Configuración para los márgenes del sistema (StatusBar y NavigationBar)
+        //Configuración para los márgenes del sistema, por si incluimos barras de navegacion, etc
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
+
+        //Busqueda tradicional de componentes, usados para el buscador:
         searchView = findViewById(R.id.searchView)
         btnBuscar = findViewById(R.id.btnBuscar)
 
-        // Configuración de Firebase
+        //Configuracion de Firebase:
         database = FirebaseDatabase.getInstance().reference
 
-        // Configuración del RecyclerView
+        //Configuracion del RecyclerView
         contactosRecycler = binding.recyclerContactos
         contactosRecycler.layoutManager = LinearLayoutManager(this)
         contactosRecycler.setHasFixedSize(true)
         contactosLista = arrayListOf()
+        //Hacemos copia de la lista completa a contactosListaOriginal para recuperar el
+        //estado despues de la busquedas
+        contactosListaOriginal = ArrayList(contactosLista)
 
-        contactosListaOriginal = ArrayList(contactosLista)  // Copiar la lista completa a contactosListaOriginal
-        // Adaptador para RecyclerView
+
+        // Adaptador para RecyclerView:
         contactosAdaptador = AdapterContacto(contactosLista,
-            llamadaClick = { contacto ->
-                // Acción al hacer clic en el botón de llamada
-                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contacto.numeroUno}"))
-                startActivity(intent)
-            },
+            //Add dos metodos que utilizan las funciones lambdas para la comunicacion entre clases:
+            //Pasamos un contacto, y nos hace la siguiente operacion:
             favClick = { contacto ->
                 val contactoId = contacto.id
                 if (contactoId != null) {
-                    val nuevoVip = contacto.vip != true // Cambiar el valor actual
+                    //Cambiar el valor actual por el contrario:
+                    val nuevoVip = contacto.vip != true
+                    //
                     database.child("contactos").child(contactoId).child("vip").setValue(nuevoVip)
                         .addOnCompleteListener {
-                            // Actualizar el estado en la lista local
+                            //Actualizamos el estado en la lista local para que actualice correctamente:
                             contacto.vip = nuevoVip
-                            // Notificar al adaptador solo para este ítem
+                            //Notificar al adaptador solo para este ítem
                             val index = contactosLista.indexOfFirst { it.id == contacto.id }
                             if (index != -1) {
                                 contactosAdaptador.notifyItemChanged(index)
@@ -91,50 +99,62 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("contactoId", contacto.id) // Pasar solo el ID del contacto
                 startActivityForResult(intent, REQUEST_CODE_EDITAR_CONTACTO)
             })
+
         contactosRecycler.adapter = contactosAdaptador
 
+
+        //Metodos para hacer el swipe, desplazamientos laterales, para los contactos, utilizamos itemTouchHelper para
+        //identificar si se desplaza el elemenmto en el recyclerView y responder acorde a ello:
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+
+            //Este primer metodo se encarga de que los elementos no acaben perdiendose o eliminandose de la lista por desplazarlos:
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false // No mover los elementos
             }
 
+            //Este segundo metodo vera la direccion donde estoy desplazando el elemento y hara una accion y otra:
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val contacto = contactosLista[position]
 
+                //En este caso le decimos que si deplaza hacia la izquierda, entraremos en una actividad para enviar un mensaje:
                 if (direction == ItemTouchHelper.LEFT) {
                     // Deslizar hacia la izquierda para enviar un mensaje
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:${contacto.numeroUno}"))
                     intent.putExtra("sms_body", "¡Hola! ¿Cómo estás?")
                     startActivity(intent)
+
+                //En este caso le decimos que si deplaza hacia la derecha, entraremos en una actividad para hacer una llamada:
                 } else if (direction == ItemTouchHelper.RIGHT) {
                     // Deslizar hacia la derecha para realizar una llamada
                     val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contacto.numeroUno}"))
                     startActivity(intent)
                 }
 
-                // Asegúrate de que el RecyclerView recargue los datos
+                //Hay que asegurar que se muestran los datos:
                 contactosAdaptador.notifyItemChanged(position)
             }
 
+            //Este metodo es donde reside toda la animacion y colores que se ven cuando se desplaza el elemento, utilizamos
+            //componentes como Canvas para hacer dibujas de colores, etc:
             override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                                      dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-
+                //Tamaño de los iconos:
                 val iconWidth = 200f // El tamaño del ícono que dibujaremos
                 val backgroundPaint = Paint()
 
-                // Si se desliza hacia la izquierda (mensaje)
+                //Si se deslizamos hacia la izquierda, enviaremos un mensaje y dibujamos icono y colores de mensaje:
                 if (dX < 0) {
-                    // Color azul para mensaje
+                    //Color azul para mensajes
                     backgroundPaint.color = Color.BLUE
 
-                    // Dibujar el fondo azul
+                    //Dibujamos el fondo azul
                     c.drawRect(viewHolder.itemView.right.toFloat() + dX, viewHolder.itemView.top.toFloat(),
                         viewHolder.itemView.right.toFloat(), viewHolder.itemView.bottom.toFloat(), backgroundPaint)
 
-                    // Dibujar icono de mensaje
-                    val icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_message) // Asegúrate de tener un ícono de mensaje
+                    //Dibujamos el icono de mensajes, lo convierte y lo dibuja:
+                    val icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_message)
                     icon?.setBounds(
                         viewHolder.itemView.right - iconWidth.toInt(),
                         viewHolder.itemView.top + (viewHolder.itemView.height / 2 - iconWidth.toInt() / 2),
@@ -144,16 +164,17 @@ class MainActivity : AppCompatActivity() {
                     icon?.draw(c)
 
                 }
-                // Si se desliza hacia la derecha (llamada)
+                // Si se desliza hacia la derecha, mismo procedimiento pero al contrario para la llamada:
                 else if (dX > 0) {
-                    // Color verde para llamada
+
+                    //Color verde para llamada
                     backgroundPaint.color = Color.GREEN
 
-                    // Dibujar el fondo verde
+                    //Dibujamos el fondo verde
                     c.drawRect(viewHolder.itemView.left.toFloat(), viewHolder.itemView.top.toFloat(),
                         viewHolder.itemView.left.toFloat() + dX, viewHolder.itemView.bottom.toFloat(), backgroundPaint)
 
-                    // Dibujar icono de llamada
+                    //Y por ultimo el icono:
                     val icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_call) // Asegúrate de tener un ícono de llamada
                     icon?.setBounds(
                         viewHolder.itemView.left,
@@ -165,98 +186,113 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-
+        //Importante una vez definido el TouchHelper es asociarlo:
         itemTouchHelper.attachToRecyclerView(contactosRecycler)
-        // Cargar los datos de Firebase
+
+
+        //Una vez terminado primeros enlaces y cargas, pasamos a cargar los datos de Firebase
         cargarDatos()
 
-        btnBuscar.setOnClickListener {
-            if (searchView.visibility == View.GONE) {
-                // Mostrar la barra de búsqueda
-                searchView.visibility = View.VISIBLE
-            } else {
-                // Ocultar la barra de búsqueda
-                searchView.visibility = View.GONE
-                // Limpiar la búsqueda cuando se oculta la barra
-                searchView.setQuery("", false)
-                filterContactos("")  // Mostrar todos los contactos y ordenarlos
-            }
-        }
-
+        //Preparamos la barra de busqueda para los contactos:
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                return false // No es necesario hacer nada aquí
+                return false
             }
 
+            //Cuando el texto cambia, ejecutamos esto:
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterContactos(newText)  // Filtrar los contactos según el texto ingresado
+                //Aqui es donde estamos filtrando los contactos a la vez que vamos escribiendo en la barra de busqueda
+                filterContactos(newText)
                 return true
             }
         })
 
-        // Configurar el botón flotante para agregar un contacto
+
+        //Add la funcionalidad para el boton Buscar
+        btnBuscar.setOnClickListener {
+            if (searchView.visibility == View.GONE) {
+                //Mostrar la barra de búsqueda
+                searchView.visibility = View.VISIBLE
+            } else {
+                //Ocultar la barra de búsqueda
+                searchView.visibility = View.GONE
+
+                //Limpiamos despues de cerrar la búsqueda
+                searchView.setQuery("", false)
+                //Y volvemos a mostrar
+                filterContactos("")
+            }
+        }
+
+        //Add la funcionalidad para el boton para agregar un contacto
         binding.btnAniadir.setOnClickListener {
-            // Acción al hacer clic en el botón de añadir un contacto
+            //Ejecuta la actvidad para add un contacto
             val intent = Intent(this, AgregarContactoActivity::class.java)
             startActivity(intent)
         }
     }
 
+
+
+    //Metodo para filtrar la lista con el buscador:
     private fun filterContactos(query: String?) {
         val filteredList = if (query.isNullOrEmpty()) {
-            // Si no hay texto, restauramos la lista completa desde contactosListaOriginal
+            //Si no hay texto, restauramos la lista completa desde contactosListaOriginal
             contactosListaOriginal
         } else {
-            // Filtrar los contactos por el nombre
+            //Filtramos los contactos por el nombre
             contactosListaOriginal.filter { it.nombre!!.contains(query, ignoreCase = true) }
         }
 
-        // Ordenar la lista filtrada (o completa si no hay filtro)
+        //Ordenamos la lista filtrada
         val sortedList = filteredList.sortedWith(compareByDescending<Contacto> { it.vip }.thenBy { it.nombre })
 
-        // Actualizar el adaptador con la lista ordenada
+        //Actualizamos el adaptador con la nueva lista ordenada
         contactosAdaptador.updateList(sortedList)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_EDITAR_CONTACTO && resultCode == Activity.RESULT_OK) {
-            val eliminado = data?.getBooleanExtra("contactoEliminado", false) ?: false
-            if (eliminado) {
-                cargarDatos() // Recargar la lista desde Firebase
-            }
-        }
-    }
 
-    // Función para cargar los datos de Firebase
+    //Metodo para recuperar los datos de Firebase
     private fun cargarDatos() {
-        // Aquí iría tu lógica para cargar la lista de contactos desde Firebase
-        // Asegúrate de ordenar los contactos con los favoritos primero
-        contactosLista.clear()  // Limpiar la lista
+        //Cuando cargamos los datos, limpiamos las listas locales, tanto principal como auxiliar:
+        contactosLista.clear()
+        contactosListaOriginal.clear()
+
+
+        //Iniciamos la sobreescritura de los metodos necesarios para realizar observaciones de
+        //cambios, y actuar especificamente sobre los nodos hijos afectados, evitando un uso
+        //constante de la lista completa:
         database.child("contactos").addChildEventListener(object : ChildEventListener {
+
+            //Cuando se agrega un contacto:
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val contacto = snapshot.getValue(Contacto::class.java)
+
                 if (contacto != null && contactosLista.none { it.id == contacto.id }) {
                     contactosLista.add(contacto)
-                    // Actualiza la lista original después de cargar los datos
+                    //Actualizamos la lista original después de cargar los datos
                     contactosListaOriginal = ArrayList(contactosLista)
-                    ordenarContactos()  // Ordenar antes de actualizar el RecyclerView
+                    //Y ordenamos los contactos antes de mostrar en el recyclerView:
+                    ordenarContactos()
                     contactosAdaptador.notifyItemInserted(contactosLista.size - 1)
                 }
             }
 
+            //Cuando ese contacto cambia en el firebase:
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 val contacto = snapshot.getValue(Contacto::class.java)
                 if (contacto != null) {
                     val index = contactosLista.indexOfFirst { it.id == contacto.id }
                     if (index != -1) {
                         contactosLista[index] = contacto
-                        ordenarContactos()  // Asegúrate de ordenar los contactos cada vez que se actualiza
+                        ordenarContactos()
+                        contactosListaOriginal = ArrayList(contactosLista)
                         contactosAdaptador.notifyItemChanged(index)
                     }
                 }
             }
 
+            //Cuando ese contacto se elimina en el firebase:
             override fun onChildRemoved(snapshot: DataSnapshot) {
                 val contacto = snapshot.getValue(Contacto::class.java)
                 if (contacto != null) {
@@ -264,6 +300,7 @@ class MainActivity : AppCompatActivity() {
                     if (index != -1) {
                         contactosLista.removeAt(index)
                         contactosAdaptador.notifyItemRemoved(index)
+                        contactosListaOriginal = ArrayList(contactosLista)
                         // Si eliminamos un contacto, recargamos la lista para actualizar los favoritos
                         ordenarContactos()
                     }
@@ -280,10 +317,25 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+
+    //Ordenador de los contactos:
     private fun ordenarContactos() {
-        // Ordenar los contactos, los favoritos primero
+        //Ordena los contactos por favoritos primero, y luego por nombre:
         contactosLista.sortWith(compareByDescending<Contacto> { it.vip }.thenBy { it.nombre })
         contactosAdaptador.notifyDataSetChanged()
+    }
+
+    //Este metodo lo utilizo para tener control sobre los datos borrados, cuando se vuelve de la actividad
+    //de edicion, si el contacto a sido borrado y era el ultimo, se quedaba en la lista, con estos metodos
+    //se consigue que el programa se de cuenta de los cambios y registra bien la lista:
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_EDITAR_CONTACTO && resultCode == Activity.RESULT_OK) {
+            val eliminado = data?.getBooleanExtra("contactoEliminado", false) ?: false
+            if (eliminado) {
+                cargarDatos() // Recargar la lista desde Firebase
+            }
+        }
     }
 
     companion object {

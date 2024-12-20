@@ -26,66 +26,69 @@ import java.util.*
 
 class AgregarContactoActivity : AppCompatActivity() {
 
-    // Referencias a Firebase Realtime Database y Storage
+    //Referencias a Firebase Realtime Database y Storage para guardar la foto
     private lateinit var database: DatabaseReference
     private lateinit var storage: FirebaseStorage
     private lateinit var storageReference: StorageReference
 
-    // Vista del layout
+    //Vista del layout con binding
     private lateinit var binding: ActivityAgregarContactoBinding
 
-    // Variable para almacenar la URI de la imagen seleccionada
+    //Variable para almacenar la URI de la imagen seleccionada
     private var selectedImageUri: Uri? = null
 
-    // Lanzador del selector de imágenes
+    //Lanzador del selector de imagenes, elegiremos la foto a subir
     private lateinit var getContent: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicialización de ViewBinding
+        //Inicializacimos el ViewBinding
         binding = ActivityAgregarContactoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicialización de Firebase
+        //Inicializacimos Firebase
         database = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference
 
-        // Configuración de botones y eventos
+        //Configuracion de los listeners:
         configurarListeners()
 
-        // Registro del lanzador para el selector de imágenes
+        //Hacemos el registro del lanzador para el selector de imágenes
         getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 selectedImageUri = it
-                binding.imgFotoContacto.setImageURI(it)  // Previsualización de la imagen seleccionada
+                //Aqui mandamos para previsualizar la imagen antes de guardar:
+                binding.imgFotoContacto.setImageURI(it)
             }
         }
     }
 
+    //Listeners:
     private fun configurarListeners() {
-        // Configurar botón de guardar
+        //Boton de guardar
         binding.btnGuardar.setOnClickListener {
             guardarContacto()
         }
 
-        // Configurar botón de cancelar
+        //Boton de cancelar
         binding.btnCancelar.setOnClickListener {
             finish()  // Cierra la actividad
         }
 
-        // Configurar selector de imagen
+        //Configuracion del selector de imagen
         binding.imgFotoContacto.setOnClickListener {
             abrirSelectorDeImagen()
         }
 
-        // Configurar selector de fecha de cumpleaños
+        //Configuracion del selector de fecha de cumpleaños
         binding.etFechaCumpleanos.setOnClickListener {
+            //Utilizo MaterialDatePicker por ser mas recomendable:
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Selecciona tu fecha de nacimiento")
                 .build()
-
+            //Las fechas las guardamos en firebase como un long de milisegundos
             datePicker.addOnPositiveButtonClickListener { dateMillis ->
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 binding.etFechaCumpleanos.setText(sdf.format(Date(dateMillis)))
@@ -95,29 +98,47 @@ class AgregarContactoActivity : AppCompatActivity() {
         }
     }
 
+    //Metodo que lanza el selector des la ruta que se indica:
     private fun abrirSelectorDeImagen() {
         getContent.launch("image/*")
     }
 
+    //Metodo para guardar un contacto nuevo:
     private fun guardarContacto() {
-        // Validación de campos obligatorios
+        //Validacion de campos obligatorios minimos:
         val nombre = binding.etNombre.text.toString().trim()
-        val apellidoUno = binding.etApellido1.text.toString().trim()
-        val apellidoDos = binding.etApellido2.text.toString().trim()
-        val email = binding.etEmail.text.toString().trim()
+        val telefono1 = binding.etTelefono1.text.toString().trim().toIntOrNull()
 
-        if (nombre.isEmpty() || apellidoUno.isEmpty() || apellidoDos.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Por favor, completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
+        //Error de datos minimos:
+
+        if (nombre.isEmpty()) {
+            binding.etNombre.error = "Este campo es obligatorio"
+        }
+
+        if (telefono1.toString().isEmpty()) {
+            binding.etTelefono1.error = "Este campo es obligatorio"
+        }
+
+        if (nombre.isEmpty() || telefono1.toString().isEmpty()) {
+            Toast.makeText(
+                this,
+                "Por favor, completa todos los campos obligatorios",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        // Obtener otros campos opcionales
-        val telefono1 = binding.etTelefono1.text.toString().toIntOrNull()
+
+        //Obtener otros campos opcionales
+        val apellidoUno = binding.etApellido1.text.toString().trim()
+        val apellidoDos = binding.etApellido2.text.toString().trim()
+        val email = binding.etEmail.text.toString().trim()
         val telefono2 = binding.etTelefono2.text.toString().toIntOrNull()
         val fechaNacimiento = binding.etFechaCumpleanos.text.toString().trim()
         val mensajePersonal = binding.etMensajePersonal.text.toString().trim()
 
-        // Convertir fecha de nacimiento a milisegundos
+
+        //Convertir fecha de nacimiento a milisegundos
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val nacimientoMillis = try {
             sdf.parse(fechaNacimiento)?.time ?: -1L
@@ -125,16 +146,16 @@ class AgregarContactoActivity : AppCompatActivity() {
             -1L
         }
 
-        // Convertir imagen seleccionada a Base64
+        //Convertir imagen seleccionada a Base64
         val imagenBase64 = selectedImageUri?.let {
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
             bitmapToBase64(bitmap)
         }
 
-        // Generar ID único para el contacto
+        //Generar ID unico para cada contacto
         val contactoId = database.child("contactos").push().key ?: return
 
-        // Crear el objeto Contacto
+        //Crear el objeto Contacto que vamos a guardar en firebase:
         val contacto = Contacto(
             id = contactoId,
             vip = binding.switchVip.isChecked,
@@ -149,9 +170,10 @@ class AgregarContactoActivity : AppCompatActivity() {
             mensajePersonal = mensajePersonal
         )
 
-        // Guardar en Firebase
+        //Guardamos en Firebase:
         database.child("contactos").child(contactoId).setValue(contacto)
             .addOnSuccessListener {
+                //Mostramos tostada de confirmacion:
                 Toast.makeText(this, "Contacto guardado exitosamente", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -161,6 +183,7 @@ class AgregarContactoActivity : AppCompatActivity() {
     }
 
 
+    //Metodo que utlizo para pasar la imagen a Base64:
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)

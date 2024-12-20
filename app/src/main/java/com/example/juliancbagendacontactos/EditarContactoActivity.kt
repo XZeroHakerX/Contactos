@@ -25,6 +25,8 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class EditarContactoActivity : AppCompatActivity() {
+
+    //Variables para el binding y para el id sobre el que trabajaremos:
     private lateinit var binding: ActivityEditarContactoBinding
     private var contactoId: String? = null
 
@@ -33,64 +35,76 @@ class EditarContactoActivity : AppCompatActivity() {
         binding = ActivityEditarContactoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recuperar el contactoId desde el Intent
+        //Recuperamos el Id desde el Intent
         contactoId = intent.getStringExtra("contactoId")
         if (contactoId == null) {
+            //Error si por lo que sea el id no se puede recuperar:
             Toast.makeText(this, "Error al cargar contacto", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        // Cargar datos del contacto desde Firebase
+        //Cargamos datos del contacto desde irebase a partir del id:
         val database = FirebaseDatabase.getInstance().reference.child("contactos").child(contactoId!!)
+
+
         database.addListenerForSingleValueEvent(object : ValueEventListener {
+            //Con este listener cargamos los datos del contacto seleccionado en los campos,
+            //si no hay contacto, genera una tostada y sale de la actividad:
             override fun onDataChange(snapshot: DataSnapshot) {
                 val contacto = snapshot.getValue(Contacto::class.java)
                 if (contacto != null) {
+                    //Si existe, carga los datos:
                     cargarDatosEnCampos(contacto)
                 } else {
+                    //Sino lanza error y vuelve:
                     Toast.makeText(this@EditarContactoActivity, "Contacto no encontrado", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
 
+            //Error de carga de datos, por si fallara cuando va a leer de firebase:
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(this@EditarContactoActivity, "Error al cargar datos", Toast.LENGTH_SHORT).show()
                 finish()
             }
         })
 
-        // Configurar los listeners de los botones
+        //Configuramos los listeners de los botones:
         configurarListeners()
     }
 
+
+    //Listeners:
     private fun configurarListeners() {
-        // Configurar selector de fecha
+        //Configuramos selector de fecha si pulsamos boton de cambiar fecha:
         binding.btnFechaNacimiento.setOnClickListener {
             mostrarSelectorFecha()
         }
 
-        // Botón de guardar cambios
+        //Configuramos boton de guardar cambios
         binding.btnGuardar.setOnClickListener {
             guardarCambios()
         }
 
-        // Botón de eliminar contacto
+        //Configuramos boton de eliminar contacto
         binding.btnEliminar.setOnClickListener {
             eliminarContacto()
         }
 
-        // Botón de volver
+        //Configuramos boton de volver
         binding.btnVolver.setOnClickListener {
             finish()
         }
 
-        // Cambiar imagen al hacer clic en la ImageView
+        //Configuramos para cambiar imagen al hacer click en la propia ImageView
         binding.imageContacto.setOnClickListener {
             seleccionarImagen()
         }
     }
 
+
+    //Metodo para cargar los datos en los diferentes editText, para su posterior modificacion:
     private fun cargarDatosEnCampos(contacto: Contacto) {
         with(binding) {
             inputNombre.setText(contacto.nombre)
@@ -101,6 +115,7 @@ class EditarContactoActivity : AppCompatActivity() {
             inputEmail.setText(contacto.email)
             inputMensajePersonal.setText(contacto.mensajePersonal)
 
+            //Cargamos la fecha haciendo las conversiones necesarias:
             contacto.nacimiento?.let { fecha ->
                 val calendar = Calendar.getInstance()
                 calendar.timeInMillis = fecha
@@ -108,6 +123,7 @@ class EditarContactoActivity : AppCompatActivity() {
                 btnFechaNacimiento.text = fechaTexto
             }
 
+            //Cargamos la imagen haciendo las modificaciones necesarias de Base64 a Bitmap:
             contacto.imagen?.let { base64String ->
                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
@@ -116,6 +132,7 @@ class EditarContactoActivity : AppCompatActivity() {
         }
     }
 
+    //Metodo para la seleccion de una nueva fecha a traves de un nuevo DatePickerDialog:
     private fun mostrarSelectorFecha() {
         val calendar = Calendar.getInstance()
         DatePickerDialog(
@@ -130,38 +147,35 @@ class EditarContactoActivity : AppCompatActivity() {
         ).show()
     }
 
+    //Metodo para la seleccion de una nueva imagen:
     private fun seleccionarImagen() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_CODE_IMAGE_PICKER)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_IMAGE_PICKER && resultCode == RESULT_OK) {
-            data?.data?.let { uri ->
-                val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
-                binding.imageContacto.setImageBitmap(bitmap)
-            }
-        }
-    }
 
+    //Metodo para guardar los cambios realizados:
     private fun guardarCambios() {
+        //Si el contacto es null, tira error antes de continuar:
         if (contactoId == null) {
             Toast.makeText(this, "Error al guardar los cambios.", Toast.LENGTH_SHORT).show()
             return
         }
 
+        //Recuperamos la imagen y la pasamos a ByteArray:
         val byteArray = (binding.imageContacto.drawable as? BitmapDrawable)?.bitmap?.let { bitmap ->
             val baos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
             baos.toByteArray()
         }
 
+        //Y luego Base64 para firebase
         val imagenBase64 = byteArray?.let {
             Base64.encodeToString(it, Base64.DEFAULT)
         }
 
+        //Nuevo contacto con los datos modificados, teniendo en cuenta que la id se mantenga y sea la misma:
         val nuevoContacto = Contacto(
             id = contactoId,
             nombre = binding.inputNombre.text.toString(),
@@ -179,6 +193,7 @@ class EditarContactoActivity : AppCompatActivity() {
             vip = false // Cambiar según tu lógica
         )
 
+        //Si es correcto y no falla nada, guardamos en firebase:
         val database = FirebaseDatabase.getInstance().reference.child("contactos")
         database.child(contactoId!!).setValue(nuevoContacto)
             .addOnSuccessListener {
@@ -190,16 +205,21 @@ class EditarContactoActivity : AppCompatActivity() {
             }
     }
 
+
+    //Metodo para la eliminacion de un contacto:
     private fun eliminarContacto() {
+        //Si no existe, falla y termina la ejecucion del metodo:
         if (contactoId == null) {
             Toast.makeText(this, "Error: No se puede eliminar el contacto.", Toast.LENGTH_SHORT).show()
             return
         }
 
+        //Cuadro de dialogo de confirmacion para la eliminación
         AlertDialog.Builder(this)
             .setTitle("Eliminar Contacto")
             .setMessage("¿Estás seguro de que deseas eliminar este contacto? Esta acción no se puede deshacer.")
             .setPositiveButton("Sí") { _, _ ->
+                //Si el usuario confirma, pasaremos a la eliminacion del contacto:
                 val database = FirebaseDatabase.getInstance().reference.child("contactos")
                 database.child(contactoId!!).removeValue()
                     .addOnSuccessListener {
@@ -216,6 +236,18 @@ class EditarContactoActivity : AppCompatActivity() {
             }
             .create()
             .show()
+    }
+
+    //Metodo que utiliza la actividad que llama a esta propia, para hace un buen control de
+    //las eliminaciones, principalmente con el ultimo elemento:
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_IMAGE_PICKER && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+                binding.imageContacto.setImageBitmap(bitmap)
+            }
+        }
     }
 
     companion object {

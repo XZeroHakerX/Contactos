@@ -7,7 +7,7 @@
     <string name="txtLayoutTelefonoUno">Teléfono 1</string>
     <string name="txtLayoutTelefonoDos">Teléfono 2</string>
     <string name="txtLayoutEmail">Email</string>
-    <string name="txtLayoutNacimiento">Fecha de Cumpleaños</string>
+    <string name="txtLayoutNacimiento">Fecha de Nacimiento</string>
     <string name="txtLayoutNotaPersonal">Nota Personal</string>
     <string name="txtSwitchVip">Favorito?</string>
     <string name="txtBotonGuardar">AGREGAR</string>
