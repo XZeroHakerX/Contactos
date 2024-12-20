@@ -26,6 +26,8 @@ import com.example.juliancbagendacontactos.models.Contacto
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,6 +57,11 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+        val screenSplash = installSplashScreen()
+
+        // Configuración de la pantalla de inicio y su duración
+        screenSplash.setKeepOnScreenCondition { false }
+        Thread.sleep(3000) // Mantiene la Splash Screen por 3 segundos
 
         //Busqueda tradicional de componentes, usados para el buscador:
         searchView = findViewById(R.id.searchView)

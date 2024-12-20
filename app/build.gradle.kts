@@ -49,6 +49,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation (libs.glide)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.core.splashscreen)
     annotationProcessor (libs.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -1,10 +1,9 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
     <style name="Base.Theme.JulianCBAgendaContactos" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowSplashScreenBackground">@color/primario_variante</item>
-        <item name="android:windowSplashScreenAnimatedIcon"> @drawable/animacion_delfin_splash</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/animacion_delfin_splash</item>
         <item name="android:windowSplashScreenBrandingImage">@drawable/brandingv02a</item>
     </style>
-
-    <style name="Theme.JulianCBAgendaContactos" parent="Base.Theme.JulianCBAgendaContactos" />
 </resources>
