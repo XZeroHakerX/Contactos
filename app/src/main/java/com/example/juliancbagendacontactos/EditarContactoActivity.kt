@@ -15,7 +15,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.juliancbagendacontactos.databinding.ActivityEditarContactoBinding
 import com.example.juliancbagendacontactos.models.Contacto
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 import java.util.*
@@ -30,27 +33,46 @@ class EditarContactoActivity : AppCompatActivity() {
         binding = ActivityEditarContactoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recuperar datos del intent
-        val contacto = intent.getParcelableExtra<Contacto>("contacto")
-        if (contacto == null) {
+        // Recuperar el contactoId desde el Intent
+        contactoId = intent.getStringExtra("contactoId")
+        if (contactoId == null) {
             Toast.makeText(this, "Error al cargar contacto", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        contactoId = contacto.id
+        // Cargar datos del contacto desde Firebase
+        val database = FirebaseDatabase.getInstance().reference.child("contactos").child(contactoId!!)
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val contacto = snapshot.getValue(Contacto::class.java)
+                if (contacto != null) {
+                    cargarDatosEnCampos(contacto)
+                } else {
+                    Toast.makeText(this@EditarContactoActivity, "Contacto no encontrado", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
 
-        // Cargar datos en los campos
-        cargarDatosEnCampos(contacto)
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@EditarContactoActivity, "Error al cargar datos", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        })
 
+        // Configurar los listeners de los botones
+        configurarListeners()
+    }
+
+    private fun configurarListeners() {
         // Configurar selector de fecha
         binding.btnFechaNacimiento.setOnClickListener {
-            mostrarSelectorFecha(contacto)
+            mostrarSelectorFecha()
         }
 
         // Botón de guardar cambios
         binding.btnGuardar.setOnClickListener {
-            guardarCambios(contacto)
+            guardarCambios()
         }
 
         // Botón de eliminar contacto
@@ -94,17 +116,13 @@ class EditarContactoActivity : AppCompatActivity() {
         }
     }
 
-    private fun mostrarSelectorFecha(contacto: Contacto) {
+    private fun mostrarSelectorFecha() {
         val calendar = Calendar.getInstance()
-        contacto.nacimiento?.let {
-            calendar.timeInMillis = it
-        }
         DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
                 val fechaTexto = "$dayOfMonth/${month + 1}/$year"
                 binding.btnFechaNacimiento.text = fechaTexto
-                contacto.nacimiento = GregorianCalendar(year, month, dayOfMonth).timeInMillis
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -128,7 +146,12 @@ class EditarContactoActivity : AppCompatActivity() {
         }
     }
 
-    private fun guardarCambios(contacto: Contacto) {
+    private fun guardarCambios() {
+        if (contactoId == null) {
+            Toast.makeText(this, "Error al guardar los cambios.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val byteArray = (binding.imageContacto.drawable as? BitmapDrawable)?.bitmap?.let { bitmap ->
             val baos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
@@ -153,14 +176,14 @@ class EditarContactoActivity : AppCompatActivity() {
                 GregorianCalendar(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt()).timeInMillis
             },
             imagen = imagenBase64,
-            vip = contacto.vip
+            vip = false // Cambiar según tu lógica
         )
 
         val database = FirebaseDatabase.getInstance().reference.child("contactos")
         database.child(contactoId!!).setValue(nuevoContacto)
             .addOnSuccessListener {
                 Toast.makeText(this, "Contacto actualizado", Toast.LENGTH_SHORT).show()
-                onBackPressedDispatcher.onBackPressed()
+                finish()
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Error al actualizar contacto", Toast.LENGTH_SHORT).show()
@@ -173,29 +196,22 @@ class EditarContactoActivity : AppCompatActivity() {
             return
         }
 
-        // Mostrar cuadro de diálogo de confirmación
         AlertDialog.Builder(this)
             .setTitle("Eliminar Contacto")
             .setMessage("¿Estás seguro de que deseas eliminar este contacto? Esta acción no se puede deshacer.")
             .setPositiveButton("Sí") { _, _ ->
-
-                // Proceder con la eliminación
                 val database = FirebaseDatabase.getInstance().reference.child("contactos")
                 database.child(contactoId!!).removeValue()
                     .addOnSuccessListener {
                         Toast.makeText(this, "Contacto eliminado", Toast.LENGTH_SHORT).show()
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("contactoEliminado", true)
-                        setResult(Activity.RESULT_OK, resultIntent)
+                        setResult(Activity.RESULT_OK)
                         finish()
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "Error al eliminar contacto", Toast.LENGTH_SHORT).show()
                     }
-
             }
             .setNegativeButton("No") { dialog, _ ->
-                // Cerrar el cuadro de diálogo
                 dialog.dismiss()
             }
             .create()

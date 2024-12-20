@@ -87,10 +87,9 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             menuClick = { contacto ->
-                // Acción al hacer clic en el botón de más opciones
                 val intent = Intent(this, EditarContactoActivity::class.java)
-                intent.putExtra("contacto", contacto)  // Envías el contacto a la actividad de edición
-                startActivityForResult(intent, REQUEST_CODE_EDITAR_CONTACTO)  // Inicia la actividad y espera el resultado
+                intent.putExtra("contactoId", contacto.id) // Pasar solo el ID del contacto
+                startActivityForResult(intent, REQUEST_CODE_EDITAR_CONTACTO)
             })
         contactosRecycler.adapter = contactosAdaptador
 
